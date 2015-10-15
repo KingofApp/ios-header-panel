@@ -9,6 +9,93 @@ This code may only be used under the MIT license.
 
 <dom-module id="ios-header-panel">
   <template>
+    <style>
+      :host {
+        --ios-header-panel-shadow: {
+          height: 6px;
+          bottom: -6px;
+          box-shadow: inset 0px 5px 6px -3px rgba(0, 0, 0, 0.4);
+        };
+
+        @apply(--layout-vertical);
+
+        position: relative;
+        height: 100%;
+      }
+
+      #mainContainer {
+        @apply(--layout-flex);
+
+        position: relative;
+        overflow-y: auto;
+        overflow-x: hidden;
+        -webkit-overflow-scrolling: touch;
+      }
+
+      #mainPanel {
+        @apply(--layout-vertical);
+        @apply(--layout-flex);
+
+        position: relative;
+      }
+
+      /*
+       * mode: scroll
+       */
+      :host([mode=scroll]) #mainContainer {
+        @apply(--ios-header-panel-scroll-container);
+
+        overflow: visible;
+      }
+
+      :host([mode=scroll]) {
+        overflow-y: auto;
+        overflow-x: hidden;
+        -webkit-overflow-scrolling: touch;
+      }
+
+      /*
+       * mode: standard
+       */
+      :host([mode=standard]) #mainContainer {
+        @apply(--ios-header-panel-standard-container);
+      }
+
+      /*
+       * mode: seamed
+       */
+      :host([mode=seamed]) #mainContainer {
+        @apply(--ios-header-panel-seamed-container);
+      }
+
+      /*
+       * mode: waterfall
+       */
+      :host([mode=waterfall]) #mainContainer {
+        @apply(--ios-header-panel-waterfall-container);
+      }
+
+      #dropShadow {
+        @apply(--ios-header-panel-shadow);
+
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 6px;
+        pointer-events: none;
+
+        -webkit-transition: opacity 0.5s;
+        transition: opacity 0.5s;
+
+        opacity: 0;
+      }
+
+      #dropShadow.has-shadow {
+        opacity: 1;
+      }
+    </style>
+
     <content id="headerContent" select="ios-toolbar, .ios-header"></content>
 
     <div id="mainPanel">
