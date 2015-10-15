@@ -20,8 +20,180 @@ This code may only be used under the MIT license.
   </template>
 
   <script>
-    Polymer({
-      is: 'ios-header-panel',
-    });
+    (function() {
+      'use strict';
+
+      var SHADOW_WHEN_SCROLLING = 1;
+      var SHADOW_ALWAYS = 2;
+      var MODE_CONFIGS = {
+        outerScroll: {
+          'scroll': true
+        },
+
+        shadowMode: {
+          'standard': SHADOW_ALWAYS,
+          'waterfall': SHADOW_WHEN_SCROLLING
+        }
+      };
+
+      Polymer({
+        is: 'ios-header-panel',
+
+        /**
+         * Fired when the content has been scrolled.  `event.detail.target` returns
+         * the scrollable element which you can use to access scroll info such as
+         * `scrollTop`.
+         *
+         *     <ios-header-panel on-content-scroll="scrollHandler">
+         *       ...
+         *     </ios-header-panel>
+         *
+         *
+         *     scrollHandler: function(event) {
+         *       var scroller = event.detail.target;
+         *       console.log(scroller.scrollTop);
+         *     }
+         *
+         * @event content-scroll
+         */
+
+        properties: {
+          /**
+           * Controls header and scrolling behavior. Options are
+           * `standard`, `seamed`, `waterfall` and `scroll`. Default is `standard`.
+           *
+           * `standard`: The header is a step above the panel. The header will consume the
+           * panel at the point of entry, preventing it from passing through to the
+           * opposite side.
+           *
+           * `seamed`: The header is presented as seamed with the panel.
+           *
+           * `waterfall`: Similar to standard mode, but header is initially presented as
+           * seamed with panel, but then separates to form the step.
+           *
+           * `scroll`: The header keeps its seam with the panel, and is pushed off screen.
+           */
+          mode: {
+            type: String,
+            value: 'standard',
+            reflectToAttribute: true
+          },
+
+          /**
+           * If true, the drop-shadow is always shown no matter what mode is set to.
+           */
+          shadow: {
+            type: Boolean,
+            value: false
+          },
+
+          /**
+           * If true, the scroller is at the top
+           */
+          atTop: {
+            type: Boolean,
+            value: true,
+            readOnly: true
+          }
+        },
+
+        observers: [
+          '_computeDropShadowHidden(atTop, mode, shadow)'
+        ],
+
+        ready: function() {
+          this.scrollHandler = this._scroll.bind(this);
+          this._addListener();
+
+          // Run `scroll` logic once to initialze class names, etc.
+          this._keepScrollingState();
+        },
+
+        detached: function() {
+          this._removeListener();
+        },
+
+        /**
+         * Returns the header element
+         *
+         * @property header
+         * @type Object
+         */
+        get header() {
+          return Polymer.dom(this.$.headerContent).getDistributedNodes()[0];
+        },
+
+        /**
+         * Returns the scrollable element.
+         *
+         * @property scroller
+         * @type Object
+         */
+        get scroller() {
+          return this._getScrollerForMode(this.mode);
+        },
+
+        /**
+         * Returns true if the scroller has a visible shadow.
+         *
+         * @property visibleShadow
+         * @type Boolean
+         */
+        get visibleShadow() {
+          return this.$.dropShadow.classList.contains('has-shadow');
+        },
+
+        _computeDropShadowHidden: function(atTop, mode, shadow) {
+          var shadowMode = MODE_CONFIGS.shadowMode[mode];
+
+          if (this.shadow) {
+            this.toggleClass('has-shadow', true, this.$.dropShadow);
+          } else if (shadowMode === SHADOW_ALWAYS) {
+            this.toggleClass('has-shadow', true, this.$.dropShadow);
+          } else if (shadowMode === SHADOW_WHEN_SCROLLING && !atTop) {
+            this.toggleClass('has-shadow', true, this.$.dropShadow);
+          } else {
+            this.toggleClass('has-shadow', false, this.$.dropShadow);
+          }
+        },
+
+        _computeMainContainerClass: function(mode) {
+          // TODO:  It will be useful to have a utility for classes
+          // e.g. Polymer.Utils.classes({ foo: true });
+
+          var classes = {};
+
+          classes['flex'] = mode;
+
+          return Object.keys(classes).filter(
+            function(className) {
+              return classes[className];
+            }).join(' ');
+        },
+
+        _addListener: function() {
+          this.scroller.addEventListener('scroll', this.scrollHandler, false);
+        },
+
+        _removeListener: function() {
+          this.scroller.removeEventListener('scroll', this.scrollHandler);
+        },
+
+        _keepScrollingState: function() {
+          var main = this.scroller;
+          this._setAtTop(main.scrollTop === 0);
+        },
+
+        _scroll: function() {
+          this._keepScrollingState();
+          this.fire('content-scroll', {target: this.scroller}, {bubbles: false});
+        },
+
+        _getScrollerForMode: function(mode) {
+          return MODE_CONFIGS.outerScroll[mode] ?
+              this : this.$.mainContainer;
+        }
+      });
+    })();
   </script>
 </dom-module>
