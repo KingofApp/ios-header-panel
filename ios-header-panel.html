@@ -1,0 +1,385 @@
+<!--
+@license
+Copyright (c) 2015 Team King of App. All rights reserved.
+This code may only be used under the MIT license.
+-->
+
+<link rel="import" href="../polymer/polymer.html">
+<link rel="import" href="../iron-flex-layout/iron-flex-layout.html">
+
+<!--
+`ios-header-panel` contains a header section and a content panel section.
+
+__Important:__ The `ios-header-panel` will not display if its parent does not have a height.
+
+Using layout classes, you can make the `ios-header-panel` fill the screen
+
+    <body class="fullbleed layout vertical">
+      <ios-header-panel class="flex">
+        <ios-toolbar>
+          <div>Hello World!</div>
+        </ios-toolbar>
+      </ios-header-panel>
+    </body>
+
+Special support is provided for scrolling modes when one uses a ios-toolbar or
+equivalent for the header section.
+
+Example:
+
+    <ios-header-panel>
+      <ios-toolbar>Header</ios-toolbar>
+      <div>Content goes here...</div>
+    </ios-header-panel>
+
+If you want to use other than `ios-toolbar` for the header, add `ios-header`
+class to that element.
+
+Example:
+
+    <ios-header-panel>
+      <div class="ios-header">Header</div>
+      <div>Content goes here...</div>
+    </ios-header-panel>
+
+To have the content fit to the main area, use the `fit` class.
+
+    <ios-header-panel>
+      <div class="ios-header">standard</div>
+      <div class="fit">content fits 100% below the header</div>
+    </ios-header-panel>
+
+Modes
+
+Controls header and scrolling behavior. Options are `standard`, `seamed`,
+`waterfall` and `scroll`. Default is `standard`.
+
+Mode | Description
+----------------|-------------
+`standard` | The header is a step above the panel. The header will consume the panel at the point of entry, preventing it from passing through to the opposite side.
+`seamed` | The header is presented as seamed with the panel.
+`waterfall` | Similar to standard mode, but header is initially presented as seamed with panel, but then separates to form the step.
+`scroll` | The header keeps its seam with the panel, and is pushed off screen.
+
+Example:
+
+    <ios-header-panel mode="waterfall">
+      <div class="ios-header">standard</div>
+      <div class="content fit">content fits 100% below the header</div>
+    </ios-header-panel>
+
+
+Styling header panel:
+
+To change the shadow that shows up underneath the header:
+
+    ios-header-panel {
+      --ios-header-panel-shadow: {
+          height: 6px;
+          bottom: -6px;
+          box-shadow: inset 0px 5px 6px -3px rgba(0, 0, 0, 0.4);
+      };
+    }
+
+To change the panel container in different modes:
+
+    ios-header-panel {
+      --ios-header-panel-standard-container: {
+        border: 1px solid gray;
+      };
+
+      --ios-header-panel-seamed-container: {
+        border: 1px solid gray;
+      };
+
+      --ios-header-panel-waterfall-container: {
+        border: 1px solid gray;
+      };
+
+      --ios-header-panel-scroll-container: {
+        border: 1px solid gray;
+      };
+    }
+
+@group iOS Elements
+@element ios-header-panel
+@demo demo/index.html
+-->
+
+<dom-module id="ios-header-panel">
+  <template>
+    <style>
+      :host {
+        --ios-header-panel-shadow: {
+          height: 6px;
+          bottom: -6px;
+          box-shadow: inset 0px 5px 6px -3px rgba(0, 0, 0, 0.4);
+        };
+
+        @apply(--layout-vertical);
+
+        position: relative;
+        height: 100%;
+      }
+
+      #mainContainer {
+        @apply(--layout-flex);
+
+        position: relative;
+        overflow-y: auto;
+        overflow-x: hidden;
+        -webkit-overflow-scrolling: touch;
+      }
+
+      #mainPanel {
+        @apply(--layout-vertical);
+        @apply(--layout-flex);
+
+        position: relative;
+      }
+
+      /*
+       * mode: scroll
+       */
+      :host([mode=scroll]) #mainContainer {
+        @apply(--ios-header-panel-scroll-container);
+
+        overflow: visible;
+      }
+
+      :host([mode=scroll]) {
+        overflow-y: auto;
+        overflow-x: hidden;
+        -webkit-overflow-scrolling: touch;
+      }
+
+      /*
+       * mode: standard
+       */
+      :host([mode=standard]) #mainContainer {
+        @apply(--ios-header-panel-standard-container);
+      }
+
+      /*
+       * mode: seamed
+       */
+      :host([mode=seamed]) #mainContainer {
+        @apply(--ios-header-panel-seamed-container);
+      }
+
+      /*
+       * mode: waterfall
+       */
+      :host([mode=waterfall]) #mainContainer {
+        @apply(--ios-header-panel-waterfall-container);
+      }
+
+      #dropShadow {
+        @apply(--ios-header-panel-shadow);
+
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 6px;
+        pointer-events: none;
+
+        -webkit-transition: opacity 0.5s;
+        transition: opacity 0.5s;
+
+        opacity: 0;
+      }
+
+      #dropShadow.has-shadow {
+        opacity: 1;
+      }
+    </style>
+
+    <content id="headerContent" select="ios-toolbar, .ios-header"></content>
+
+    <div id="mainPanel">
+      <div id="mainContainer" class$="[[_computeMainContainerClass(mode)]]">
+        <content id="mainContent" select="*"></content>
+      </div>
+      <div id="dropShadow"></div>
+    </div>
+  </template>
+
+  <script>
+    (function() {
+      'use strict';
+
+      var SHADOW_WHEN_SCROLLING = 1;
+      var SHADOW_ALWAYS = 2;
+      var MODE_CONFIGS = {
+        outerScroll: {
+          'scroll': true
+        },
+
+        shadowMode: {
+          'standard': SHADOW_ALWAYS,
+          'waterfall': SHADOW_WHEN_SCROLLING
+        }
+      };
+
+      Polymer({
+        is: 'ios-header-panel',
+
+        /**
+         * Fired when the content has been scrolled.  `event.detail.target` returns
+         * the scrollable element which you can use to access scroll info such as
+         * `scrollTop`.
+         *
+         *     <ios-header-panel on-content-scroll="scrollHandler">
+         *       ...
+         *     </ios-header-panel>
+         *
+         *
+         *     scrollHandler: function(event) {
+         *       var scroller = event.detail.target;
+         *       console.log(scroller.scrollTop);
+         *     }
+         *
+         * @event content-scroll
+         */
+
+        properties: {
+          /**
+           * Controls header and scrolling behavior. Options are
+           * `standard`, `seamed`, `waterfall` and `scroll`. Default is `standard`.
+           *
+           * `standard`: The header is a step above the panel. The header will consume the
+           * panel at the point of entry, preventing it from passing through to the
+           * opposite side.
+           *
+           * `seamed`: The header is presented as seamed with the panel.
+           *
+           * `waterfall`: Similar to standard mode, but header is initially presented as
+           * seamed with panel, but then separates to form the step.
+           *
+           * `scroll`: The header keeps its seam with the panel, and is pushed off screen.
+           */
+          mode: {
+            type: String,
+            value: 'standard',
+            reflectToAttribute: true
+          },
+
+          /**
+           * If true, the drop-shadow is always shown no matter what mode is set to.
+           */
+          shadow: {
+            type: Boolean,
+            value: false
+          },
+
+          /**
+           * If true, the scroller is at the top
+           */
+          atTop: {
+            type: Boolean,
+            value: true,
+            readOnly: true
+          }
+        },
+
+        observers: [
+          '_computeDropShadowHidden(atTop, mode, shadow)'
+        ],
+
+        ready: function() {
+          this.scrollHandler = this._scroll.bind(this);
+          this._addListener();
+
+          // Run `scroll` logic once to initialze class names, etc.
+          this._keepScrollingState();
+        },
+
+        detached: function() {
+          this._removeListener();
+        },
+
+        /**
+         * Returns the header element
+         *
+         * @property header
+         * @type Object
+         */
+        get header() {
+          return Polymer.dom(this.$.headerContent).getDistributedNodes()[0];
+        },
+
+        /**
+         * Returns the scrollable element.
+         *
+         * @property scroller
+         * @type Object
+         */
+        get scroller() {
+          return this._getScrollerForMode(this.mode);
+        },
+
+        /**
+         * Returns true if the scroller has a visible shadow.
+         *
+         * @property visibleShadow
+         * @type Boolean
+         */
+        get visibleShadow() {
+          return this.$.dropShadow.classList.contains('has-shadow');
+        },
+
+        _computeDropShadowHidden: function(atTop, mode, shadow) {
+          var shadowMode = MODE_CONFIGS.shadowMode[mode];
+
+          if (this.shadow) {
+            this.toggleClass('has-shadow', true, this.$.dropShadow);
+          } else if (shadowMode === SHADOW_ALWAYS) {
+            this.toggleClass('has-shadow', true, this.$.dropShadow);
+          } else if (shadowMode === SHADOW_WHEN_SCROLLING && !atTop) {
+            this.toggleClass('has-shadow', true, this.$.dropShadow);
+          } else {
+            this.toggleClass('has-shadow', false, this.$.dropShadow);
+          }
+        },
+
+        _computeMainContainerClass: function(mode) {
+          // TODO:  It will be useful to have a utility for classes
+          // e.g. Polymer.Utils.classes({ foo: true });
+
+          var classes = {};
+
+          classes['flex'] = mode;
+
+          return Object.keys(classes).filter(
+            function(className) {
+              return classes[className];
+            }).join(' ');
+        },
+
+        _addListener: function() {
+          this.scroller.addEventListener('scroll', this.scrollHandler, false);
+        },
+
+        _removeListener: function() {
+          this.scroller.removeEventListener('scroll', this.scrollHandler);
+        },
+
+        _keepScrollingState: function() {
+          var main = this.scroller;
+          this._setAtTop(main.scrollTop === 0);
+        },
+
+        _scroll: function() {
+          this._keepScrollingState();
+          this.fire('content-scroll', {target: this.scroller}, {bubbles: false});
+        },
+
+        _getScrollerForMode: function(mode) {
+          return MODE_CONFIGS.outerScroll[mode] ?
+              this : this.$.mainContainer;
+        }
+      });
+    })();
+  </script>
+</dom-module>
