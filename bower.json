@@ -1,6 +1,6 @@
 {
   "name": "ios-header-panel",
-  "version": "0.0.1",
+  "version": "0.1.0",
   "description": "A header and content wrapper for layout with headers",
   "authors": [
     "Abdón Rodríguez Davila <thepeer@kingofapp.es>"
