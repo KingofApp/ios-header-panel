@@ -1,0 +1,39 @@
+{
+  "name": "ios-header-panel",
+  "description": "A header and content wrapper for layout with headers",
+  "authors": [
+    "Abdón Rodríguez Davila <thepeer@kingofapp.es>"
+  ],
+  "keywords": [
+    "web-components",
+    "web-component",
+    "polymer",
+    "ios",
+    "layout"
+  ],
+  "main": "ios-header-panel.html",
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/KingofApp/ios-header-panel.git"
+  },
+  "license": "MIT",
+  "dependencies": {
+    "polymer": "Polymer/polymer#^1.1.0",
+    "iron-flex-layout": "PolymerElements/iron-flex-layout#^1.0.0"
+  },
+  "devDependencies": {
+    "iron-component-page": "PolymerElements/iron-component-page#^1.0.0",
+    "webcomponentsjs": "webcomponents/webcomponentsjs#^0.7.0"
+  },
+  "homepage": "https://github.com/KingofApp/ios-header-panel",
+  "_release": "a12e154a4a",
+  "_resolution": {
+    "type": "branch",
+    "branch": "master",
+    "commit": "a12e154a4a1f17210adbf584c130803983e4ef6c"
+  },
+  "_source": "git://github.com/KingofApp/ios-header-panel.git",
+  "_target": "master",
+  "_originalSource": "KingofApp/ios-header-panel",
+  "_direct": true
+}

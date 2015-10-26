@@ -1,0 +1,95 @@
+<!--
+@license
+Copyright (c) 2015 Team King of App. All rights reserved.
+This code may only be used under the MIT license.
+-->
+
+<!doctype html>
+<html>
+  <head>
+    <title>ios-header-panel demo</title>
+
+    <script src="../../webcomponentsjs/webcomponents.js"></script>
+    <link rel="import" href="../../paper-styles/demo-pages.html">
+    <link rel="import" href="../ios-header-panel.html">
+
+    <style is="custom-style">
+      body {
+        padding: 40px;
+      }
+
+      ios-header-panel {
+        float: left;
+        width: 240px;
+        height: 240px;
+        margin: 12px;
+        @apply(--shadow-elevation-2dp);
+      }
+
+      .ios-header {
+        height: 60px;
+        font-size: 16px;
+        line-height: 60px;
+        padding: 0 10px;
+        color: white;
+        transition: height 0.2s;
+      }
+
+      .content {
+        height: 2000px;
+      }
+
+      .blue .ios-header {
+        background-color: var(--paper-light-blue-500);
+      }
+      .red .ios-header {
+        background-color: var(--paper-red-500);
+      }
+      .orange .ios-header {
+        background-color: var(--paper-amber-500);
+      }
+      .green .ios-header {
+        background-color: var(--paper-green-500);
+      }
+
+      /* TODO: replace these with background: linear-gradient(white, var(...))
+       when custom properties allow it */
+
+      .blue .content {
+        background: linear-gradient(white, #b3e5fc);
+      }
+      .red .content {
+        background: linear-gradient(white, #ffcdd2);
+      }
+      .orange .content {
+        background: linear-gradient(white, #ffecb3);
+      }
+      .green .content {
+        background: linear-gradient(white, #c8e6c9);
+      }
+    </style>
+  </head>
+  <body>
+    <div class="layout wrap inline center-center">
+      <ios-header-panel class="blue">
+        <div class="ios-header">standard</div>
+        <div class="content"></div>
+      </ios-header-panel>
+
+      <ios-header-panel mode="seamed" class="red">
+        <div class="ios-header">seamed</div>
+        <div class="content"></div>
+      </ios-header-panel>
+
+      <ios-header-panel mode="scroll" class="orange">
+        <div class="ios-header">scroll</div>
+        <div class="content"></div>
+      </ios-header-panel>
+
+      <ios-header-panel mode="waterfall" class="green">
+        <div class="ios-header">waterfall</div>
+        <div class="content"></div>
+      </ios-header-panel>
+    </div>
+  </body>
+</html>
